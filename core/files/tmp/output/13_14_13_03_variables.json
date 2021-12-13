@@ -1,0 +1,180 @@
+[
+    {
+        "variables": [
+            "TestMethod",
+            "Temperature",
+            "CompositeElement"
+        ],
+        "found_kObjs_for_variables": [
+            6,
+            9,
+            1,
+            7,
+            8
+        ],
+        "variables_frequency": [
+            9,
+            6,
+            1,
+            7,
+            8
+        ],
+        "variables_searchSpace": [
+            6,
+            9,
+            1,
+            7,
+            8,
+            3
+        ],
+        "variables_from_abstract": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+        ],
+        "variables_from_summary": [
+            1,
+            6,
+            7,
+            9,
+            23,
+            29
+        ],
+        "variables_from_goal_description": [
+            1,
+            3,
+            8,
+            16,
+            17
+        ],
+        "variables_question_answering": [
+            6,
+            1
+        ],
+        "knowledgeObjects": [
+            {
+                "id": 29,
+                "category": "TestMethod",
+                "labels": [
+                    "HR"
+                ]
+            },
+            {
+                "id": 9,
+                "category": "CompositeElement",
+                "labels": [
+                    "molybdenum disulfide",
+                    "MoS2",
+                    "MoS2"
+                ]
+            },
+            {
+                "id": 4,
+                "category": "OperationalParameter",
+                "labels": [
+                    "25\u02daC"
+                ]
+            },
+            {
+                "id": 10,
+                "category": "TestMethod",
+                "labels": [
+                    "X"
+                ]
+            },
+            {
+                "id": 5,
+                "category": "OperationalParameter",
+                "labels": [
+                    "60\u02daC"
+                ]
+            },
+            {
+                "id": 6,
+                "category": "Temperature",
+                "labels": [
+                    "temperature",
+                    "temperatures",
+                    "room temperature",
+                    "about"
+                ]
+            },
+            {
+                "id": 16,
+                "category": "IntermediateMedium",
+                "labels": [
+                    "polyalphaolefin oil"
+                ]
+            },
+            {
+                "id": 1,
+                "category": "CompositeElement",
+                "labels": [
+                    "molybdenum dithiocarbamate",
+                    "MoDTC",
+                    "MoDTC",
+                    "molybudenum dithiocarbamate"
+                ]
+            },
+            {
+                "id": 7,
+                "category": "TestMethod",
+                "labels": [
+                    "X - ray Photoelectron Spectroscopy",
+                    "XPS",
+                    "XPS"
+                ]
+            },
+            {
+                "id": 17,
+                "category": "OperationalParameter",
+                "labels": [
+                    "7.94 mm2 / sec"
+                ]
+            },
+            {
+                "id": 2,
+                "category": "TestMethod",
+                "labels": [
+                    "ball",
+                    "balls"
+                ]
+            },
+            {
+                "id": 23,
+                "category": "OperationalParameter",
+                "labels": [
+                    "30 min",
+                    "minutes"
+                ]
+            },
+            {
+                "id": 8,
+                "category": "CompositeElement",
+                "labels": [
+                    "Mo",
+                    "IV",
+                    "IV",
+                    "Mo:220",
+                    "VI"
+                ]
+            },
+            {
+                "id": 3,
+                "category": "CompositeElement",
+                "labels": [
+                    "calcium sulfonate",
+                    "CaSU",
+                    "CaSU"
+                ]
+            }
+        ]
+    }
+]

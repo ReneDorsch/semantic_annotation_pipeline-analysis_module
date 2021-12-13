@@ -1,0 +1,381 @@
+{
+    "meta_information":{
+        "goal":{
+            "question":[
+                "What is the goal of this work?",
+                "What has been investigated?",
+                "What properties are investigated?",
+                "What was studied?"
+            ],
+            "expectedAnswerSpace":[
+                "<CompositeElement>",
+                "<Bodystructure>",
+                "<ManufacturingProcess>",
+                "<Geometry>",
+                "<Humidity>",
+                "<Load>",
+                "<Rounds>",
+                "<Speed>",
+                "<KinematicParameter>",
+                "<InputAttribute>",
+                "<Distance>",
+                "<Temperature>",
+                "<Pressure>",
+                "<KinematicMovement>"
+            ],
+            "preSearchSpace":[
+                "the goal",
+                "(this|current|currently) (paper|work|research|contribution|letter|study)",
+                "the focus",
+                "works on",
+                "investigate",
+                "studied",
+                "study",
+                "aim"
+            ],
+            "normalState":"",
+            "dependend_from_variables":[
+
+            ],
+            "specific_questionType":"GOAL",
+            "broader_questionType":"META_DATA",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+
+            ],
+            "controlquestions":[
+
+            ]
+        }
+    },
+
+    "operational_parameter":{
+        "pressure":{
+            "question":[
+                "What quantity was the hertzian pressure in Pascal during the test?",
+                "What quantity was the pressure in Pascal?",
+                "How big was the Pressure in Pascal?",
+                "What quantity was the pressure?"
+            ],
+            "expectedAnswerSpace":[
+                "([0-9]{0,5}\\.|)[0-9]+ (G|M|k|m|)Pa"
+            ],
+            "preSearchSpace":[
+                " (G|M|k|m|)Pa ",
+                "Pascal",
+                "pressure",
+                "Hertzian Pressure"
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+                "<Pressure>",
+                "<NormalLoad>"
+            ],
+            "specific_questionType":"PRESSURE",
+            "broader_questionType":"OPERATIONAL_PARAMETER",
+            "weak_dependency_to":[
+            ],
+            "strong_dependency_to":[
+            ],
+            "controlquestions":[
+                {
+                    "to":"TEST_METHOD",
+                    "question":"What testmethod was used with [ANSWER]?"
+                }
+            ]
+        },
+        "velocity":{
+            "question":[
+                "What quantity was the velocity has been used during the test?",
+                "What quantity was the velocity in meter per second?",
+                "What was the velocity?",
+                "What quantity was the speed in meter per second?"
+            ],
+            "expectedAnswerSpace":[
+                "([0-9]{0,5}\\.|)[0-9]+ (k|m|)m( |)(/|per|)( |)(s|h|min)"
+            ],
+            "preSearchSpace":[
+                " m/s ",
+                "m/min",
+                "tribometer",
+                "velocity",
+                "speed"
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+                "<Rounds>",
+                "<Speed>"
+            ],
+            "specific_questionType":"VELOCITY",
+            "broader_questionType":"OPERATIONAL_PARAMETER",
+            "weak_dependency_to":[
+            ],
+            "strong_dependency_to":[
+            ],
+            "controlquestions":[
+                {
+                    "to":"TEST_METHOD",
+                    "question":"What testmethod was used with [ANSWER]?"
+                }
+            ]
+        },
+        "distance":{
+            "question":[
+                "What quantity was the distance during the test?",
+                "What quantity was the distance in meter?",
+                "What distance was covered during the test?"
+            ],
+            "expectedAnswerSpace":[
+                "([0-9]{0,5}\\.|)[0-9]+ (dm|m|km)"
+            ],
+            "preSearchSpace":[
+                "distance"
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+                "<Rounds>",
+                "<Distance>"
+            ],
+            "specific_questionType":"DISTANCE",
+            "broader_questionType":"OPERATIONAL_PARAMETER",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+
+            ],
+            "controlquestions":[
+                {
+                    "to":"TEST_METHOD",
+                    "question":"What testmethod was used to identify [ANSWER]?"
+                }
+            ]
+        },
+        "temperature":{
+            "question":[
+                "What quantity was the temperature during the test?",
+                "What quantity was the temperature in degree Celsius?",
+                "What was the temperature?"
+            ],
+            "expectedAnswerSpace":[
+                "(([0-9]{0,5}\\.|)[0-9]+ *(\\+\\/-|±) ){0,1}([0-9]{0,5}\\.|)[0-9]+ *(°|◦| )(C|K|C)",
+                "room temperature"
+            ],
+            "preSearchSpace":[
+                "°C ",
+                "tribometer",
+                "Celsius",
+                "temperature",
+                "° C ",
+                " Kelvin",
+                " K "
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+                "<Temperature>"
+            ],
+            "specific_questionType":"TEMPERATURE",
+            "broader_questionType":"OPERATIONAL_PARAMETER",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+
+            ],
+            "controlquestions":[
+                {
+                    "to":"TEST_METHOD",
+                    "question":"What testmethod was used to identify [ANSWER]?"
+                }
+            ]
+        },
+        "rel_humidity":{
+            "question":[
+                "What quantity was the humidity during the test?",
+                "What quantity was the rel. humidity in %?",
+                "What was the humidity?"
+            ],
+            "expectedAnswerSpace":[
+                "([0-9]{0,5}\\.|)[0-9]+ *%",
+                "<OperationalParameter>"
+            ],
+            "preSearchSpace":[
+                "humidity",
+                "tribometer",
+                "test"
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+                "<Humidity>"
+            ],
+            "specific_questionType":"HUMIDITY",
+            "broader_questionType":"OPERATIONAL_PARAMETER",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+
+            ],
+            "controlquestions":[
+                {
+                    "to":"TEST_METHOD",
+                    "question":"What testmethod was used to identify [ANSWER]?"
+                }
+            ]
+        },
+        "testing_duration":{
+            "question":[
+                "What was the test duration for the test?",
+                "How many minutes went the test?",
+                "How long did the test go on?"
+            ],
+            "expectedAnswerSpace":[
+                "([0-9]{0,5}\\.|)[0-9]+ *(min|h|s)",
+                "<OperationalParameter>"
+            ],
+            "preSearchSpace":[
+                " minutes ",
+                "min ",
+                " hour",
+                " second"
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+                "<Rounds>",
+                "<Duration>"
+            ],
+            "specific_questionType":"TESTING_DURATION",
+            "broader_questionType":"OPERATIONAL_PARAMETER",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+
+            ],
+            "controlquestions":[
+                {
+                    "to":"TEST_METHOD",
+                    "question":"What testmethod was used to identify [ANSWER]?"
+                }
+            ]
+        }
+
+    },
+    "output_parameter":{
+        "wear_rate":{
+            "question":[
+                "What wear rate was found?",
+                "What wear rate was identified",
+                "To which value changed the wear rate?"
+            ],
+            "expectedAnswerSpace":[
+                "([0-9]{0,5}\\.|)[0-9]+"
+            ],
+            "preSearchSpace":[
+                "wear track",
+                "wear coefficient",
+                "wear",
+                "wear volumne"
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+
+            ],
+            "specific_questionType":"WEAR_RATE",
+            "broader_questionType":"WEAR_BEHAVIOUR",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+                "HYPOTHESIS"
+            ],
+            "controlquestions":[
+                {
+                    "to":"HYPOTHESIS",
+                    "question":"For what parameters was a wear rate of [ANSWER] found?"
+                }
+            ]
+        },
+
+
+
+        "Coefficent_of_Friction":{
+            "describtion":"Type of Conditions for the Friction",
+            "question":[
+                "What COF was found?",
+                "What Coefficient of friction was identified",
+                "To which value changed the coefficent of friction?"
+            ],
+            "answerQA":"",
+            "expectedAnswerSpace":[
+                "0\\.[0-9]+"
+            ],
+            "preSearchSpace":[
+                "COF",
+                "friction coefficient",
+                "coefficient of Friction",
+                "CoF",
+                "level of friction"
+            ],
+            "normalState":"Unspecified",
+            "answer":"",
+            "dependend_from_variables":[
+
+            ],
+            "specific_questionType":"COEFFICIENT_OF_FRICTION",
+            "broader_questionType":"FRICTION_BEHAVIOUR",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+                "HYPOTHESIS"
+            ],
+            "controlquestions":[
+                {
+                    "to":"",
+                    "question":""
+                }
+            ]
+        }
+
+    },
+    "body":{
+
+        "Material":{
+            "question":[
+                "What material has been used during the test?",
+                "What is the material that will be investigated?",
+                "How is the material named that will be researched?"
+            ],
+            "expectedAnswerSpace":[
+                "<CompositeElement>"
+            ],
+            "preSearchSpace":[
+                "<CompositeElement>"
+            ],
+            "normalState":"Unspecified",
+            "dependend_from_variables":[
+                "<CompositeElement>"
+            ],
+            "specific_questionType":"BODY_NAME",
+            "broader_questionType":"BODY",
+            "weak_dependency_to":[
+
+            ],
+            "strong_dependency_to":[
+
+            ],
+            "controlquestions":[
+                {
+                    "to":"",
+                    "question":""
+                }
+            ]
+        }
+    }
+
+
+
+}
