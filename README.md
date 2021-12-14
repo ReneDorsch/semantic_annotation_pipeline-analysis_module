@@ -34,7 +34,9 @@ For the analysis-module add the models of the folder qa_models to:
 
 
 ### Download and install the other modules, to execute the annotation process.
-ToDo: Add links to repositories.
+https://github.com/ReneDorsch/semantic_annotation_pipeline-ui/
+https://github.com/ReneDorsch/semantic_annotation_pipeline-extraction_module/
+https://github.com/ReneDorsch/semantic_annotation_pipeline-annotation_module/
 
 ### Start the program
 `python main.py`
