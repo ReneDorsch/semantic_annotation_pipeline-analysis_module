@@ -25,7 +25,13 @@ conda activate NEW_ENVIRONMENT_NAME
 pip install -r requirements.txt
 `
 ### Download the trained models
-ToDo: Add links to repositories.
+
+https://faubox.rrze.uni-erlangen.de/getlink/fiB1CqZjVGbadQo4MgX7KacR/Models.zip 
+
+This file includes the trained models for each subtask. Download it and add them to the specified folders.
+For the analysis-module add the models of the folder qa_models to:
+/core/apis/_internal_/QA_Pipeline/models/[TABLE_MODEL/TEXT_MODEL]
+
 
 ### Download and install the other modules, to execute the annotation process.
 ToDo: Add links to repositories.
