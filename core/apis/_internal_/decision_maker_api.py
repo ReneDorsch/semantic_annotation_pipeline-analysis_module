@@ -4,7 +4,7 @@ import datetime
 from typing import Set, List, Tuple
 from core.Datamodels.Topological_Map import KnowledgeObject
 from core.Datamodels.Datamodels import Answer, TableAnswer, TextAnswer
-from core.Datamodels.Answer_Document import AnswerDocument
+from core.Datamodels.Answer_Document import _AnswerDocument
 
 import core.Datamodels.coordinating_model as cm
 import copy
@@ -81,7 +81,7 @@ class DecisionMaker:
         if len(result) == 0:
             return 'rejected', result
 
-        prev_answers: List[AnswerDocument] = self.infrastructure.get_previous_answers_of_same_type(answerDoc)
+        prev_answers: List[_AnswerDocument] = self.infrastructure.get_previous_answers_of_same_type(answerDoc)
 
         if len(prev_answers) <= 2:
             return 'wait', result
@@ -152,7 +152,7 @@ class DecisionMaker:
                     return None, 'rejected'
         return None, 'rejected'
 
-    def make_decision(self, answerDoc: AnswerDocument) -> Tuple[str, AnswerDocument]:
+    def make_decision(self, answerDoc: _AnswerDocument) -> Tuple[str, _AnswerDocument]:
         answers = []
         t_answers = []
 
@@ -285,7 +285,7 @@ class DecisionMaker:
 
         return res, res2
 
-    def table_vote(self, answerDoc: AnswerDocument, table_answers: List[Answer]) -> List[Answer]:
+    def table_vote(self, answerDoc: _AnswerDocument, table_answers: List[Answer]) -> List[Answer]:
         '''
         What does it?
         Determines the resulting answer to a QuestionTemplate according to the tables in a document.
@@ -324,7 +324,7 @@ class DecisionMaker:
         decision, result = decision2, result2
         return decision, result
 
-    def text_vote(self, answerDoc: AnswerDocument, answers: List[Answer]) -> List[Answer]:
+    def text_vote(self, answerDoc: _AnswerDocument, answers: List[Answer]) -> List[Answer]:
         '''
         What does it?
         Determines the resulting answer to a QuestionTemplate according to the text in a document.

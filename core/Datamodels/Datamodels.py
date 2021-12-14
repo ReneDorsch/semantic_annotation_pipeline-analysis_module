@@ -573,34 +573,37 @@ class Table:
         self.description: List[Sentence] = []
         self.table_data = []
 
-    def table_as_list(self) -> List:
-
-        data_lines = [[_._text for _ in line.cells] for line in self._data]
-        res = DataFrame(data_lines, index=[_._text for _ in self._table_header.cells]).T
-
+    def table_as_list(self) -> DataFrame:
+        """ Transforms the table to a dataframe"""
+        try:
+            data_lines = [[_._text for _ in line.cells] for line in self._data]
+            res = DataFrame(data_lines, index=[_._text for _ in self._table_header.cells]).T
+        except:
+            data_lines = [[_._text for _ in line.cells] for line in self._data]
+            res = DataFrame(data_lines)
         return res
 
     def get_knowledgeObjects(self) -> List[KnowledgeObject]:
+        """ Returns the knowledgeobjects in the table. """
         return self._knowledgeObjects
 
 
     def get_cell_at(self, cell_coordinates) -> Cell:
-        # If the first row was selected it is the labels
-        #if row == 0:
-        #    return self._table_header.get_cell_at(column)
-        # Else it is the data
-        #else:
-
+        """ Gets the cell of a template with the given coordinates. """
         return self._data[cell_coordinates.column].get_cell_at(cell_coordinates.row)
 
 
-    def get_textual_representation(self):
+    def get_textual_representation(self) -> List[str]:
+        """ Returns the textual representations of the table (so the tables in a textual format)
+            For further information see function: read_from_api
+        """
         return self._textual_representation
 
     def get_table_name(self) -> str:
+        """ Returns the name of the table. """
         return self._table_name
 
-    def _set_table_name(self):
+    def _set_table_name(self) -> None:
         if self._header is not None:
             description = self._header._description
             regex = '(fig\.|figure|table|tab\.) *\d+'
@@ -609,11 +612,13 @@ class Table:
                 self._table_name = res.group()
 
     def as_pandas_df(self) -> DataFrame:
+        
         table = self.table_as_list()
         return table
 
 
-    def set_knowledgeObjects(self, value: List[KnowledgeObject]):
+    def set_knowledgeObjects(self, value: List[KnowledgeObject]) -> None:
+        """ References the knowledgeobjects to the table. """
         kObjs: List[KnowledgeObject] = []
         for kObj in value:
             if kObj.id in self.__knowledgeObject_references:
@@ -628,7 +633,8 @@ class Table:
             sentence.set_knowledgeObjects(self._knowledgeObjects)
 
     @classmethod
-    def read_from_api(cls, data: IO_Models.InputTable):
+    def read_from_api(cls, data: IO_Models.InputTable) -> Table:
+        """ Creates a new table from the Input-Definition of the api. """
         data_header = None
         if data.description is not None:
             data_header = Header.read_from_api(data.description)
@@ -658,7 +664,8 @@ class Table:
 
         return table
 
-    def _set_units(self):
+    def _set_units(self) -> None:
+        """ Adds units to the cells"""
         for line in self._data:
             for cell, unit in zip(line.cells, self._units):
                 if unit not in cell._text:
@@ -682,6 +689,7 @@ class Line:
 
     @classmethod
     def read_from_api(cls, data):
+        """ Creates a new Line (could be a row or a column) from the api definition."""
         line: Line = cls()
         line.cells = [Cell.read_from_api(cell) for cell in data.cells]
 
@@ -693,6 +701,7 @@ class Line:
         return line
 
     def set_knowledgeObjects(self, value: List[KnowledgeObject]):
+        """ Creates a reference to the knowledegobjects that are in the line. """
         kObjs: List[KnowledgeObject] = []
         for kObj in value:
             if kObj.id in self.__knowledgeObject_references:
@@ -714,6 +723,7 @@ class Cell:
         self._category: str = ''
 
     def has_references(self) -> bool:
+        """ Checks if any knowledgeObject is part of the cell. """
         return self.__knowledgeObject_references != []
 
     def get_references(self) -> List[int]:
@@ -723,9 +733,11 @@ class Cell:
         return self._text
 
     def get_knowledgeObjects(self) -> List[KnowledgeObject]:
+        """ Returns the knowledgeobjects in the cell. """
         return self._knowledgeObjects
 
     def set_knowledgeObjects(self, value: List[KnowledgeObject]):
+        """ Create a reference to the knowledgeobects that are in the cell. """ 
         kObjs: List[KnowledgeObject] = []
         for kObj in value:
             for _reference_kObj in self.__knowledgeObject_references:
@@ -738,6 +750,7 @@ class Cell:
 
     @classmethod
     def read_from_api(cls, data: IO_Models.InputCell):
+        """ Creates a cell according to the definition of the api. """
         data_knowledgeObject_reference = []
         if data.knowledgeObject_references is not None:
             data_knowledgeObject_reference = data.knowledgeObject_references
@@ -756,6 +769,7 @@ class Header:
 
     @classmethod
     def read_from_api(cls, data) -> Header:
+        """ Creates a header according to the definition of the api. """
         header = cls()
         header._description = Sentence.read_from_text(data, [])
         return header

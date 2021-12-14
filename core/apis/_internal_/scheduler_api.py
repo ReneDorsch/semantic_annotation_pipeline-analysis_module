@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import List, Set
-from core.Datamodels.Answer_Document import AnswerDocument
+from core.Datamodels.Answer_Document import _AnswerDocument
 from core.apis._internal_.template_creation_api import TemplateEngine
 from core.Datamodels.Archive.Answer_Document_Archive import AnswerDocumentArchive
 from core.Datamodels.Question_Template import QuestionTemplate
@@ -27,11 +27,11 @@ class Scheduler:
 
         pass
 
-    def get_previous_answers_of_same_type(self, answerDoc: AnswerDocument) -> List[AnswerDocument]:
-        answers: List[AnswerDocument] = self._hypothesisSpace.get_answers()
+    def get_previous_answers_of_same_type(self, answerDoc: _AnswerDocument) -> List[_AnswerDocument]:
+        answers: List[_AnswerDocument] = self._hypothesisSpace.get_answers()
 
         searched_answer_type = answerDoc.questionTemplate.get_questionType()[1]
-        answers_of_same_type: List[AnswerDocument] = []
+        answers_of_same_type: List[_AnswerDocument] = []
         for answer in answers:
             answer_type = answer.questionTemplate.get_questionType()[1]
             if searched_answer_type == answer_type:
@@ -53,7 +53,7 @@ class Scheduler:
         #     goal_answer_docs.append(self._template_engine.build_answer_document(questionTemplate))
         self.identify_variables_by_question_answering()
 
-    def _get_variables(self, data: Set[AnswerDocument]):
+    def _get_variables(self, data: Set[_AnswerDocument]):
         variables_question_answering = data.get_knowledgeObjects_from_answers()
         self._hypothesisSpace.save_answerDoc(data)
         path_description_topological_map: List[str] = ['get_kObjs_in_abstract', 'get_kObjs_in_summary',
@@ -66,7 +66,7 @@ class Scheduler:
         for questionTemplate in self._question_templates:
             specific_questiontype = questionTemplate.get_questionType()[0]
             if specific_questiontype == 'GOAL':
-                document: AnswerDocument = (
+                document: _AnswerDocument = (
                 'to_qa', self._template_engine.build_answer_document(questionTemplate, doc_type='GOAL'))
                 answerDocuments.append(document)
                 self._goal_question_templates.append(questionTemplate)
@@ -112,7 +112,7 @@ class Scheduler:
         print("ok")
 
     def set_variations(self):
-        variations: List[AnswerDocument] = []
+        variations: List[_AnswerDocument] = []
         for qTemplate in self._variation_question_templates:
             answerDocument = ('to_qa', self._template_engine.build_answer_document(qTemplate, doc_type='VARIATION'))
             variations.append(answerDocument)
@@ -125,7 +125,7 @@ class Scheduler:
 
     def set_static_parameters(self):
 
-        static_parameters: List[AnswerDocument] = []
+        static_parameters: List[_AnswerDocument] = []
         for qTemplate in self._static_question_templates_without_dependencies:
             answerDocument = ('to_qa', self._template_engine.build_answer_document(qTemplate, doc_type='STATIC'))
             static_parameters.append(answerDocument)
@@ -143,7 +143,7 @@ class Scheduler:
         hypothesis = self._build_hypothesis()
         # For each Hypothesis build a answerDocument
 
-        variations: List[AnswerDocument] = []
+        variations: List[_AnswerDocument] = []
         for hypo in hypothesis:
             for qTemplate in self._output_question_templates:
                 # ToDo: Expenisive operation maybe look for some things to imporve the performance
@@ -157,7 +157,7 @@ class Scheduler:
 
         # Check the waiting answers if these could be answered now
 
-    def accepted_answer(self, answerDoc: AnswerDocument):
+    def accepted_answer(self, answerDoc: _AnswerDocument):
         # If the question is not a Variation. Check if the question has any not answered dependency
         # If so: send them after saving the answer to the qa_pipeline
         self._hypothesisSpace.save_answerDoc(answerDoc)
@@ -183,7 +183,7 @@ class Scheduler:
 
         self.infracstructure.interpret_decision(datas)
 
-    def rejected_answer(self, answerDoc: AnswerDocument):
+    def rejected_answer(self, answerDoc: _AnswerDocument):
         # Whats with the case if a questionTemplate has more as one strong dependency?
         # I haven't done it yet, but it should restrict the questionTemplate
 
@@ -213,7 +213,7 @@ class Scheduler:
             # Update the loop
             _not_answerable_questionTemplates = zwerg_not_answerable_questionTemplates
 
-    def update_answer_document(self, answerDoc: AnswerDocument):
+    def update_answer_document(self, answerDoc: _AnswerDocument):
         answerDocument = None
         if answerDoc.get_mode() == 1:
             answerDocument = self._template_engine.build_answer_document(task='extended',

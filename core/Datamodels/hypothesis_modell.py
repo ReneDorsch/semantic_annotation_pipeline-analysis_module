@@ -1,16 +1,16 @@
 from __future__ import annotations
 from typing import List, Set
-from core.Datamodels.Answer_Document import AnswerDocument
+from core.Datamodels.Answer_Document import _AnswerDocument
 import itertools
 from core.schemas import LogFile
 
 class HypothesisSpace:
 
     def __init__(self):
-        self._answered_documents: List[AnswerDocument] = []
+        self._answered_documents: List[_AnswerDocument] = []
         self._hypothesis: List[Hypothesis] = []
-        self._variations: List[AnswerDocument] = []
-        self._static_parameters: List[AnswerDocument] = []
+        self._variations: List[_AnswerDocument] = []
+        self._static_parameters: List[_AnswerDocument] = []
 
 
     def has_answer_for_category(self, questionCategory) -> bool:
@@ -19,7 +19,7 @@ class HypothesisSpace:
                 return True
         return False
 
-    def get_answer_for_category(self, questionCategory) -> AnswerDocument:
+    def get_answer_for_category(self, questionCategory) -> _AnswerDocument:
         for answer in self._answered_documents:
             if questionCategory == answer.questionTemplate.get_questionType()[0]:
                 final_answers = answer.get_result()
@@ -34,11 +34,11 @@ class HypothesisSpace:
                     return labels
 
 
-    def get_answers(self) -> List[AnswerDocument]:
+    def get_answers(self) -> List[_AnswerDocument]:
         return self._answered_documents
 
 
-    def save_answerDoc(self, doc: AnswerDocument) -> None:
+    def save_answerDoc(self, doc: _AnswerDocument) -> None:
         if doc.type == 'VARIATION':
             self._variations.append(doc)
         elif doc.type == 'STATIC':
@@ -159,16 +159,16 @@ class HypothesisSpace:
 
 class Hypothesis:
     ID_Counter = 1
-    def __init__(self, variables, answers_variation: List[AnswerDocument], answers_static: List[AnswerDocument]):
+    def __init__(self, variables, answers_variation: List[_AnswerDocument], answers_static: List[_AnswerDocument]):
         self._id = Hypothesis.ID_Counter
         self.synonym: Answer = None
 
-        self.variation: Set[AnswerDocument] = self._set_variation_parameters(variables, answers_variation)
-        self.staticBodyParameters: Set[AnswerDocument] = self._set_static_body_parameters(answers_static)
-        self.staticCounterBodyParameters: Set[AnswerDocument] = self._set_static_counterbody_parameters(answers_static)
-        self.staticParameters: Set[AnswerDocument] = self._set_static_parameters(answers_static)
-        self.frictionBehaviour: Set[AnswerDocument] = set()
-        self.wearBehaviour: Set[AnswerDocument] = set()
+        self.variation: Set[_AnswerDocument] = self._set_variation_parameters(variables, answers_variation)
+        self.staticBodyParameters: Set[_AnswerDocument] = self._set_static_body_parameters(answers_static)
+        self.staticCounterBodyParameters: Set[_AnswerDocument] = self._set_static_counterbody_parameters(answers_static)
+        self.staticParameters: Set[_AnswerDocument] = self._set_static_parameters(answers_static)
+        self.frictionBehaviour: Set[_AnswerDocument] = set()
+        self.wearBehaviour: Set[_AnswerDocument] = set()
 
         Hypothesis.ID_Counter += 1
 
@@ -221,11 +221,11 @@ class Hypothesis:
             'answer_documents': variation + static_parameters + friction_behaviour + wear_behaviour,
         }
 
-    def get_variations(self) -> Set[AnswerDocument]:
+    def get_variations(self) -> Set[_AnswerDocument]:
         return [_[1] for _ in self.variation]
 
 
-    def add_answerDoc(self, answerDoc: AnswerDocument):
+    def add_answerDoc(self, answerDoc: _AnswerDocument):
         if answerDoc.questionTemplate._broader_question_type == 'FRICTION_BEHAVIOUR':
             if len(answerDoc.get_result()) > 0:
                 self.frictionBehaviour.add((answerDoc, answerDoc._final_answer[0]))
@@ -238,7 +238,7 @@ class Hypothesis:
             else:
                 self.frictionBehaviour.add((answerDoc, None))
 
-    def _set_static_body_parameters(self, answers_static: List[AnswerDocument]):
+    def _set_static_body_parameters(self, answers_static: List[_AnswerDocument]):
         res = set()
         for answerDoc in answers_static:
             if answerDoc.questionTemplate._broader_question_type == 'BODY':
@@ -248,7 +248,7 @@ class Hypothesis:
                     res.add((answerDoc, None))
         return res
 
-    def _set_static_counterbody_parameters(self, answers_static: List[AnswerDocument]):
+    def _set_static_counterbody_parameters(self, answers_static: List[_AnswerDocument]):
         res = set()
         for answerDoc in answers_static:
             if answerDoc.questionTemplate._broader_question_type == 'COUNTERBODY':
@@ -259,7 +259,7 @@ class Hypothesis:
         return res
 
 
-    def _set_static_parameters(self, answers_static: List[AnswerDocument]):
+    def _set_static_parameters(self, answers_static: List[_AnswerDocument]):
         res = set()
         for answerDoc in answers_static:
             if answerDoc.questionTemplate._broader_question_type != 'BODY' and \
@@ -270,7 +270,7 @@ class Hypothesis:
                     res.add((answerDoc, None))
         return res
 
-    def _set_variation_parameters(self, variations, answers_variation: List[AnswerDocument]):
+    def _set_variation_parameters(self, variations, answers_variation: List[_AnswerDocument]):
         res = set()
         for answerDoc in answers_variation:
             for variation in variations:

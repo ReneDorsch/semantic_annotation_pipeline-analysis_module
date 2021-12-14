@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import List, Tuple
-from core.Datamodels.Answer_Document import AnswerDocument
+from core.Datamodels.Answer_Document import _AnswerDocument
 import core.apis._internal_.decision_maker_api as DM
 import core.apis._internal_.scheduler_api as SD
 from core.apis._internal_.QA_Pipeline.QA_Fabric import QuestionFabric
@@ -12,7 +12,7 @@ class Infrastructure:
         self.decision_maker: DM.DecisionMaker = decisonmaker
         self.scheduler: SD.Scheduler = scheduler
         self.qa_fabric: QuestionFabric = qa_fabric
-        self.parking_spot: List[AnswerDocument] = []
+        self.parking_spot: List[_AnswerDocument] = []
         self.topological_map: TopologicalMap = None
         self.scheduler.set_infrastructure(self)
         self.qa_fabric.set_infrastructure(self)
@@ -21,14 +21,14 @@ class Infrastructure:
     def set_topological_map(self, topMap: TopologicalMap) -> None:
         self.topological_map = topMap
 
-    def get_previous_answers_of_same_type(self, answerDoc: AnswerDocument) -> List[AnswerDocument]:
+    def get_previous_answers_of_same_type(self, answerDoc: _AnswerDocument) -> List[_AnswerDocument]:
         return self.scheduler.get_previous_answers_of_same_type(answerDoc)
 
     def send_waiting_data_to_decision_maker(self):
         for answerDoc in self.parking_spot:
             self._send_data_to_decision_maker(answerDoc)
 
-    def send_data_to_waiting_spot(self, data: AnswerDocument):
+    def send_data_to_waiting_spot(self, data: _AnswerDocument):
         # If the answerDocument is the first time in the parking spot
         # its ok, but if it will try to be a second time in it, reject the answerDoc
         if data not in self.parking_spot:
@@ -37,7 +37,7 @@ class Infrastructure:
             # Breaking condition for the waiting answers
             self._send_data_to_scheduler('rejected', data)
 
-    def _send_data_to_scheduler(self, decision: str, data: AnswerDocument):
+    def _send_data_to_scheduler(self, decision: str, data: _AnswerDocument):
         if data in self.parking_spot:
             self.parking_spot.remove(data)
 
@@ -53,11 +53,11 @@ class Infrastructure:
             self.scheduler.update_answer_document(decision, data)
 
 
-    def _send_data_to_decision_maker(self, data: AnswerDocument):
+    def _send_data_to_decision_maker(self, data: _AnswerDocument):
         self.decision_maker.make_decision(data)
 
 
-    def _send_data_to_qa_fabric(self, data: AnswerDocument):
+    def _send_data_to_qa_fabric(self, data: _AnswerDocument):
         self.qa_fabric.load_question_template_in_queue(data)
         self.qa_fabric.wait_until_question_answering_finishes()
 
@@ -83,7 +83,7 @@ class Infrastructure:
         self.scheduler.set_variables(variables)
 
 
-    def interpret_decision(self, data: List[Tuple[str, AnswerDocument]]):
+    def interpret_decision(self, data: List[Tuple[str, _AnswerDocument]]):
         for decision, answer in data:
             if decision == 'to_qa':
                 self._send_data_to_qa_fabric(answer)
@@ -93,7 +93,7 @@ class Infrastructure:
                 self._send_data_to_scheduler(decision, answer)
 
 
-    def get_waiting_answerDocs(self) -> List[AnswerDocument]:
+    def get_waiting_answerDocs(self) -> List[_AnswerDocument]:
         return self.parking_spot
 
 

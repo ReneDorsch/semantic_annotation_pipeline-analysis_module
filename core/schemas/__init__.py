@@ -12,7 +12,7 @@ class AnswerDocument(BaseModel):
     final_result: str
     final_answer: List
     type: str
-    question_template: Tuple[str, str]
+    question_template: Any
     final_answer_knowledgeObject_table_ids: List[int]
     final_answer_knowledgeObject_text_ids: List[int]
     final_answer_textual_representation_text: Any

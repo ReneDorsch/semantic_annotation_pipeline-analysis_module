@@ -4,7 +4,7 @@ from core.Datamodels.Question_Template import QuestionTemplate
 from typing import List, Tuple
 
 
-class AnswerDocument:
+class _AnswerDocument:
     '''
     A Answer Document is a Instance of a QuestionTemplate combined with the background data. It will be used
     as the Datamodel for the QA and the decision making.
@@ -17,7 +17,7 @@ class AnswerDocument:
         self._hypothesis = hypothesis
         self.type = type
 
-        self.__id = AnswerDocument.IDCounter
+        self.__id = _AnswerDocument.IDCounter
         self._table_contexts: List[Tuple[Question, TableContext]] = table_tuple
         self._text_contexts: List[Tuple[Question, TextContext]] = text_tuple
 
@@ -40,7 +40,7 @@ class AnswerDocument:
         self._final_answer: Union[Answer, List[Answer]] = None
         self._final_result: str = ''
 
-        AnswerDocument.IDCounter += 1
+        _AnswerDocument.IDCounter += 1
 
     def get_id(self) -> int:
         return self.__id

@@ -4,7 +4,7 @@ from core.Datamodels.Archive.Answer_Document_Archive import AnswerDocumentArchiv
 from core.Datamodels.Question_Template import QuestionTemplate
 from core.Datamodels.Topological_Map import TopologicalMap
 from core.Datamodels.Datamodels import Question, Context, TextContext, TableContext, KnowledgeObject
-from core.Datamodels.Answer_Document import AnswerDocument
+from core.Datamodels.Answer_Document import _AnswerDocument
 from core.Datamodels.hypothesis_modell import Hypothesis, HypothesisSpace
 import re
 
@@ -33,7 +33,7 @@ class TemplateEngine:
     def update_hypothesisSpace(self, space: HypothesisSpace):
         self.__hypothesisSpace = space
 
-    def update_dict(self, document: AnswerDocument) -> None:
+    def update_dict(self, document: _AnswerDocument) -> None:
         if document in self.__dict_of_AnswerDocuments:
             return
         self.__dict_of_AnswerDocuments[document.questionTemplate] = document
@@ -256,7 +256,7 @@ class TemplateEngine:
     def _safe_in_archive(self, archive_file: Tuple[AnswerDocumentArchive, str]) -> None:
         self._archive[archive_file[1]] = archive_file[0]
 
-    def build_answer_document(self, template: QuestionTemplate, task: str = 'normal', hypothesis: Hypothesis = None, doc_type: str ='', mode: int =1) -> AnswerDocument:
+    def build_answer_document(self, template: QuestionTemplate, task: str = 'normal', hypothesis: Hypothesis = None, doc_type: str ='', mode: int =1) -> _AnswerDocument:
         # Gets the contexts by searching the different types of Information Units (Table, Text) with the
         # predefined searchstrings
         text_contexts, table_contexts = self._build_context(template, task)
@@ -266,7 +266,7 @@ class TemplateEngine:
         table_tuple: List[Tuple[Question, TableContext]] = self._build_question_tablecontext_tuple(template, table_contexts, hypothesis)
 
         archive_key: str = '_'.join(template.get_questionType())
-        answer_document = AnswerDocument(template, hypothesis, text_tuple, table_tuple, doc_type, mode)
+        answer_document = _AnswerDocument(template, hypothesis, text_tuple, table_tuple, doc_type, mode)
         if archive_key not in self._archive:
             self._archive[archive_key] = [answer_document]
         else:

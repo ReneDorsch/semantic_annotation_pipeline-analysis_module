@@ -4,10 +4,11 @@ from queue import Queue
 
 import torch
 from transformers import pipeline, TapasTokenizer, TapasForQuestionAnswering
+from transformers import AutoConfig
 
 from core import config
 from core.Datamodels.Datamodels import TableContext, TableAnswer, TextContext, TextAnswer, Question
-from core.Datamodels.Answer_Document import AnswerDocument
+from core.Datamodels.Answer_Document import _AnswerDocument
 import pandas as pd
 
 
@@ -20,7 +21,7 @@ def text_question_worker(queue: Queue):
     while True:
 
         answerList = []
-        doc: AnswerDocument = queue.get()
+        doc: _AnswerDocument = queue.get()
 
         if doc == -1:
             print("Feierabend")
@@ -179,7 +180,7 @@ def table_question_worker(queue: Queue):
     while True:
 
         answerList = []
-        doc: AnswerDocument = queue.get()
+        doc: _AnswerDocument = queue.get()
 
         if doc == -1:
             print("Feierabend")
@@ -240,9 +241,12 @@ def initializeTextPipeline() -> pipeline:
         device = torch.cuda.current_device()
     else:
         torch.cuda.set_device(device)
+
+    _config = AutoConfig.from_pretrained(config.QA_MODEL)
     return pipeline(
         task="question-answering",                      # Type of Task
         model=config.QA_MODEL,          # Model used for QA
         tokenizer=config.QA_TOKENIZER,  # Tokenizer used to transform the words in a vector
-        device=device                                   # device>0 -> GPU, device<0 CPU
+        device=device,                                   # device>0 -> GPU, device<0 CPU
+        config=_config
     )
