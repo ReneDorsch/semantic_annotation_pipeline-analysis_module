@@ -4,20 +4,21 @@ from core.Datamodels.Question_Template import QuestionTemplate
 from typing import List, Tuple
 
 
-class _AnswerDocument:
+class AnswerLog:
     '''
     A Answer Document is a Instance of a QuestionTemplate combined with the background data. It will be used
     as the Datamodel for the QA and the decision making.
     '''
     IDCounter = 1
     def __init__(self, template: QuestionTemplate, hypothesis: Hypothesis,
-                 text_tuple: List[Tuple[Question, TextContext]], table_tuple: List[Tuple[Question, TableContext]], type, mode):
+                 text_tuple: List[Tuple[Question, TextContext]], table_tuple: List[Tuple[Question, TableContext]], type, mode, question_templates):
         self._mode: int = mode
         self._questionTemplate: QuestionTemplate = template
         self._hypothesis = hypothesis
         self.type = type
+        self._questionTemplates: List[QuestionTemplate] = question_templates
 
-        self.__id = _AnswerDocument.IDCounter
+        self.__id = AnswerLog.IDCounter
         self._table_contexts: List[Tuple[Question, TableContext]] = table_tuple
         self._text_contexts: List[Tuple[Question, TextContext]] = text_tuple
 
@@ -37,10 +38,28 @@ class _AnswerDocument:
         self.final_result_textual_representation_table: str = ''
         self.final_result_knowledgeobject_table: str = ''
 
-        self._final_answer: Union[Answer, List[Answer]] = None
-        self._final_result: str = ''
+        self._final_answer: Union[Answer, List[Answer]] = []
+        self._final_result: str = 'rejected'
 
-        _AnswerDocument.IDCounter += 1
+        AnswerLog.IDCounter += 1
+
+    def get_final_answer(self) -> List[Answer]:
+        return self._final_answer
+
+    def get_table_answers(self) -> List[TableAnswer]:
+        return self._answers_in_tables
+
+    def get_text_answers(self) -> List[TextAnswer]:
+        return self._answers_in_text
+
+    def get_dependency_logs(self, archive) -> List[AnswerLog]:
+        """ Returns a list of all answer logs that share a dependency to this log. """
+
+        res = []
+        for dependency in self.questionTemplate.get_dependencies():
+
+            res.append(dependency.get_answer_log(archive))
+        return res
 
     def get_id(self) -> int:
         return self.__id
@@ -51,7 +70,7 @@ class _AnswerDocument:
     def get_mode(self) -> int:
         return self._mode
 
-    def get_result(self) -> Answer:
+    def get_result(self) -> List[Answer]:
         return self._final_answer
 
     def set_final_text_answers(self, text_result: List[str], knowledgeObject_result: List[KnowledgeObject] ):
@@ -71,7 +90,11 @@ class _AnswerDocument:
         self.final_result_knowledgeobject_table = kObj_result
 
     def set_final_answer(self, answer: Answer ):
-        self._final_answer = answer
+        if isinstance(answer, Answer):
+            self._final_answer = [answer]
+        else:
+            self._final_answer = answer
+
 
     def set_final_result(self, result: str):
         self._final_result = result

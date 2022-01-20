@@ -206,10 +206,10 @@
         },
         "pressure":{
             "question":[
-                "What quantity was the hertzian pressure in Pascal during the test?",
-                "What quantity was the pressure in Pascal?",
-                "How big was the Pressure in Pascal?",
-                "What quantity was the pressure?"
+                "What was the Hertzian pressure in pascals during the experiment?",
+                "How high was the pressure in pascals?",
+                "What was the pressure in pascals?",
+                "How big was the pressure?"
             ],
             "expectedAnswerSpace":[
                 "([0-9]{0,5}\\.|)[0-9]+ (G|M|k|m|)Pa"

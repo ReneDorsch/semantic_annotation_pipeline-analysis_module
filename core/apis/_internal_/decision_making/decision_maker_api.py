@@ -4,7 +4,7 @@ import datetime
 from typing import Set, List, Tuple
 from core.Datamodels.Topological_Map import KnowledgeObject
 from core.Datamodels.Datamodels import Answer, TableAnswer, TextAnswer
-from core.Datamodels.Answer_Document import _AnswerDocument
+from core.Datamodels.Answer_Document import AnswerLog
 
 import core.Datamodels.coordinating_model as cm
 import copy
@@ -43,8 +43,9 @@ def _save_variables_as_json(variables, found_kObjs, variables_searchSpace, varia
 
 class DecisionMaker:
 
-    def __init__(self):
+    def __init__(self, archive):
         self.infrastructure: cm.Infrastructure = None
+        self.archive = archive
 
     def _vote_variation(self, answers_1: List[Answer], answers_2: List[Answer]) -> Tuple[str, List[Answer]]:
         # To-Do: Evtl. we could check the frequency in addition
@@ -61,7 +62,7 @@ class DecisionMaker:
     def vote(self, answers_1: Answer, answers_2: Answer) -> Tuple[str, Answer]:
         res = []
         if len(answers_1) > 0 and len(answers_2) > 0:
-            # Get the answers with the highest
+            # Get the answers with the most frequent answer
             maxNumber_1 = max([count for answer, count in answers_1])
             maxNumber_2 = max([count for answer, count in answers_2])
 
@@ -81,7 +82,7 @@ class DecisionMaker:
         if len(result) == 0:
             return 'rejected', result
 
-        prev_answers: List[_AnswerDocument] = self.infrastructure.get_previous_answers_of_same_type(answerDoc)
+        prev_answers: List[AnswerLog] = self.infrastructure.get_previous_answers_of_same_type(answerDoc)
 
         if len(prev_answers) <= 2:
             return 'wait', result
@@ -152,7 +153,7 @@ class DecisionMaker:
                     return None, 'rejected'
         return None, 'rejected'
 
-    def make_decision(self, answerDoc: _AnswerDocument) -> Tuple[str, _AnswerDocument]:
+    def make_decision(self, answerDoc: AnswerLog) -> Tuple[str, AnswerLog]:
         answers = []
         t_answers = []
 
@@ -173,8 +174,7 @@ class DecisionMaker:
         table_decision, table_result = self.table_vote(answerDoc, t_answers)
         text_decision, text_result = self.text_vote(answerDoc, answers)
 
-        if "FRICTION_RATE" == answerDoc.questionTemplate.get_questionType()[0]:
-            print("ok")
+
         # For the Variation Answers (Answer where we allow multiple answers),
         # we have only to compare the answers
         if answerDoc.type == 'VARIATION':
@@ -197,6 +197,7 @@ class DecisionMaker:
         # Saves the result in the document
         answerDoc.set_final_result(decision)
         answerDoc.set_final_answer(answer)
+
         return self.infrastructure._send_data_to_scheduler(decision, answerDoc)
 
     def __get_nary_decision(self, table_decision: str, table_results: List[TableAnswer],
@@ -285,7 +286,7 @@ class DecisionMaker:
 
         return res, res2
 
-    def table_vote(self, answerDoc: _AnswerDocument, table_answers: List[Answer]) -> List[Answer]:
+    def table_vote(self, answerDoc: AnswerLog, table_answers: List[Answer]) -> List[Answer]:
         '''
         What does it?
         Determines the resulting answer to a QuestionTemplate according to the tables in a document.
@@ -324,7 +325,7 @@ class DecisionMaker:
         decision, result = decision2, result2
         return decision, result
 
-    def text_vote(self, answerDoc: _AnswerDocument, answers: List[Answer]) -> List[Answer]:
+    def text_vote(self, answerDoc: AnswerLog, answers: List[Answer]) -> List[Answer]:
         '''
         What does it?
         Determines the resulting answer to a QuestionTemplate according to the text in a document.

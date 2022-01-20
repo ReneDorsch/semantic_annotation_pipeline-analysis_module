@@ -31,7 +31,8 @@
                 "investigate",
                 "studied",
                 "study",
-                "aim"
+                "aim",
+                "<KinematicMovement>"
             ],
             "normalState":"",
             "dependend_from_variables":[
@@ -764,12 +765,14 @@
             ],
             "preSearchSpace":[
                 "friction test",
-                "ball-*on",
-                "pin-on"
+                "ball(-| |)on(-| |)dis(c|k)",
+                "pin(-| |)on(-| |)dis(c|k)"
             ],
             "normalState":"Unspecified",
             "dependend_from_variables":[
-                "<TestMethod>"
+                "<TestMethod>",
+                "ball(-| |)on(-| |)dis(c|k)",
+                "pin(-| |)on(-| |)dis(c|k)"
             ],
             "specific_questionType":"FRICTION_TEST_METHOD",
             "broader_questionType":"FRICTION_BEHAVIOUR",

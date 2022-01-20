@@ -29,3 +29,6 @@ QA_TOKENIZER = "ktrapeznikov/scibert_scivocab_uncased_squad_v2"
 QA_MODEL = "ktrapeznikov/scibert_scivocab_uncased_squad_v2"
 QA_MODEL = os.path.join(CURRENT_DIRECTORY, "apis/_internal_/QA_Pipeline/models/text_model")
 QA_TOKENIZER = os.path.join(CURRENT_DIRECTORY, "apis/_internal_/QA_Pipeline/models/text_model")
+
+
+CONTEXT_WIDTH = 1

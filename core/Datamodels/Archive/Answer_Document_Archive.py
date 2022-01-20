@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from typing import List, Dict, Tuple
-from core.Datamodels.Answer_Document import _AnswerDocument
+from core.Datamodels.Answer_Document import AnswerLog
 
 class AnswerDocumentArchive(dict):
     '''
@@ -13,7 +13,7 @@ class AnswerDocumentArchive(dict):
         self.data = defaultdict(list)
         pass
 
-    def get_answered_answerDocuments(self) -> List[_AnswerDocument]:
+    def get_answered_answerDocuments(self) -> List[AnswerLog]:
         return self.data
 
     def answerDoc_was_send(self, questionTemplate: QuestionTemplate) -> bool:
@@ -27,7 +27,7 @@ class AnswerDocumentArchive(dict):
         return False
 
 
-    def save(self, data: Tuple[str, _AnswerDocument]):
+    def save(self, data: Tuple[str, AnswerLog]):
         answerdocument = data[1]
         self.data[answerdocument.type].append(data)
 

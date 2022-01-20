@@ -6,10 +6,11 @@ from core.Datamodels import IO_Models
 from core.Datamodels.Topological_Map import TopologicalMap
 from core.Datamodels.Question_Template import QuestionTemplate
 from core.apis._internal_.scheduler_api import Scheduler
-from core.apis._internal_.decision_maker_api import DecisionMaker
+from core.apis._internal_.decision_making.decision_maker_api import DecisionMaker
 from core.Datamodels.hypothesis_modell import HypothesisSpace
 from core.apis._internal_.QA_Pipeline.QA_Fabric import QuestionFabric
-from core.apis._internal_.template_creation_api import TemplateEngine
+from core.apis._internal_.generator.template_creation_api import TemplateEngine
+from core.Datamodels.Archive.Answer_Document_Archive import AnswerDocumentArchive
 from core.Datamodels.coordinating_model import Infrastructure
 from core import config
 
@@ -17,12 +18,13 @@ from core import config
 class ContextAnalyzer:
 
     def __init__(self):
-        self._decisionmaker: DecisionMaker = DecisionMaker()
         self._hypothesisSpace: HypothesisSpace = HypothesisSpace()
         self._qa_pipeline: QuestionFabric = QuestionFabric()
         self._template_engine: TemplateEngine = TemplateEngine()
         self._topological_map: TopologicalMap = None
-        self._scheduler: Scheduler = Scheduler(self._template_engine, self._hypothesisSpace)
+        self._archive: AnswerDocumentArchive = AnswerDocumentArchive()
+        self._scheduler: Scheduler = Scheduler(self._template_engine, self._hypothesisSpace, self._archive)
+        self._decisionmaker: DecisionMaker = DecisionMaker(self._archive)
         self._infrastructure: Infrastructure = Infrastructure(self._decisionmaker, self._scheduler, self._qa_pipeline)
 
     def _parse_questionTemplates(self):

@@ -21,6 +21,14 @@ class QuestionTemplate:
         self.__searchspace: List[str] = []
         self.__answerspace: List[str] = []
 
+
+    def get_dependencies(self) -> List[QuestionTemplate]:
+
+        return self._weak_dependency_to_question_types + self._strong_dependency_to_question_types
+
+    def get_log(self) -> AnswerLog:
+        return self.answer_log
+
     def has_strong_dependency_to(self, questionTemplate: QuestionTemplate):
         if questionTemplate in self._strong_dependency_to_question_types:
             return True

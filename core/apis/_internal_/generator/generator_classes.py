@@ -1,43 +1,166 @@
 from __future__ import annotations
-from typing import List, Tuple, Dict
+
+import itertools
+import re
+from typing import List, Union, Set, Dict
+
+from core.Datamodels.Answer_Document import AnswerLog
 from core.Datamodels.Archive.Answer_Document_Archive import AnswerDocumentArchive
+from core.Datamodels.Datamodels import TextContext, Question, TableContext
 from core.Datamodels.Question_Template import QuestionTemplate
 from core.Datamodels.Topological_Map import TopologicalMap
-from core.Datamodels.Datamodels import Question, Context, TextContext, TableContext, KnowledgeObject
-from core.Datamodels.Answer_Document import _AnswerDocument
-from core.Datamodels.hypothesis_modell import Hypothesis, HypothesisSpace
-import re
+from core.Datamodels.hypothesis_modell import Hypothesis
 
-class TemplateEngine:
-    '''
-    A template Engine is software designed to combine templates with a data model to produce result documents.
-    The language that the templates are written in is known as a template language or templating language.
-    For purposes of this article, a result document is any kind of formatted output, including documents, web pages,
-    or source code (in source code generation), either in whole or in fragments.
-    '''
 
-    def __init__(self):
-        self._topological_map: TopologicalMap = None
-        self._templates: List[QuestionTemplate] = []
-        self._archive: AnswerDocumentArchive = AnswerDocumentArchive()
-        self.__dict_of_AnswerDocuments: Dict = {}
-        self.__hypothesisSpace = HypothesisSpace()
+def has_placeholder(question: str) -> bool:
+    regex = "\[.+\]"
+    if re.search(regex, question):
+        return True
+    return False
 
-        '''
-        _topological_map: Is a Representation of the whole document, annotated and connected through KnowledgeObjects.
-                          It will be used as the datamodel for the template Engine.
-        _templates: A list of QuestionTemplates that will be used to create the answer_document.
-        _answer_document_archive: A archive preservering all build answer_documents.
-        '''
 
-    def update_hypothesisSpace(self, space: HypothesisSpace):
-        self.__hypothesisSpace = space
+def get_placeholders(question: str) -> List[str]:
+    """ Get the placeholders. """
+    placeholders: List[str] = []
+    regex = "[A-Z_]{2,}"
+    
+    for match in re.finditer(regex, question):
+        start: int = match.start()
+        end: int = match.end()
+        placeholder: str = question[start: end]
+        placeholders.append(placeholder)
+    
+    return placeholders
 
-    def update_dict(self, document: _AnswerDocument) -> None:
-        if document in self.__dict_of_AnswerDocuments:
-            return
-        self.__dict_of_AnswerDocuments[document.questionTemplate] = document
 
+def get_unparamterized_question(question: str) -> str:
+    """ Removes any placeholder form the question """
+    res: str = ""
+    regex = "\[.+\]"
+    match = re.search(regex, question)
+    if match is not None:
+        _placeholder_areas: str = match.group()
+        start: int = 0
+        for _match in _placeholder_areas.split("|"):
+            #end: int = _match.end()
+            
+            #_placeholder_area: str = _placeholder_areas[start: end]
+            _placeholder_area = re.sub("\||\[|\]|\_", "", _match)
+
+            if not any([word.isupper() for word in _placeholder_area.split(" ")]):
+                res = question[:match.start()] + _placeholder_area + question[match.end():]
+                break
+            #start = end
+    else:
+        res = question
+    return res
+
+
+def get_parameterized_question(question: str, placeholder: str, parameter: str) -> str:
+    """ Replaces the lsit the placeholders through the given parameter. """
+    res: str = ""
+    regex = "\[.+\]"
+    match = re.search(regex, question)
+    try:
+        _placeholder_areas: str = match.group()
+    except:
+        print("ok")
+    start: int = 0
+    for _match in _placeholder_areas.split("|"):
+        #end: int = _match.end()
+        #_placeholder_area: str = _placeholder_areas[start: end]
+        _placeholder_area = re.sub("\||\[|\]", "", _match)
+
+        if any([word == placeholder for word in _placeholder_area.split(" ")]):
+            parameterized = _placeholder_area.replace(placeholder, parameter)
+            res = question[:match.start()] + parameterized + question[match.end():]
+            break
+        #start = end
+    return res
+
+
+class QuestionGenerator:
+
+    """ Creates Question accoridng to a given context. """
+
+
+    def get_questions(self, questionTemplate: QuestionTemplate, context: TextContext, archive: AnswerDocumentArchive) -> List[Question]:
+        """ Creates a list of questions. """
+        res: List[Question] = []
+        for question in questionTemplate.get_questions():
+            # In the case that the questions has any placeholder check if any of this placeholders can be answered
+            if has_placeholder(question):
+                placeholders: List[str] = get_placeholders(question)
+                for logs in archive.values():
+                    for log in logs:
+                        for placeholder in placeholders:
+                            has_answer: bool = log.has_answer()
+                            for_placeholder: bool = placeholder in log.questionTemplate.get_questionType()
+
+                            if for_placeholder and has_answer:
+                                questions: List[Question] = self._get_parameterized_questions(question,
+                                                                                    placeholder,
+                                                                                    log.get_final_answer(),
+                                                                                    context
+                                                                                    )
+
+                                if question != []:
+                                    res.extend(questions)
+
+
+            question = get_unparamterized_question(question)
+            if len(question.rstrip().lstrip()) > 10:
+                res.append(Question(question))
+
+        return res
+
+
+    def _get_parameterized_questions(self, _question: str, placeholder, answers: List[Answer],
+                                     context: Union[TableContext, TextContext]) -> List[Question]:
+        res: List[Question] = []
+
+        for answer in answers:
+            in_context: bool = context.contains(answer)
+            if in_context:
+                representations: List[str] = context.get_answer_representation(answer)
+                for representation in representations:
+                    question = get_parameterized_question(_question, placeholder, representation)
+                    if len(question.rstrip().lstrip()) > 10:
+                        res.append(Question(question))
+        return res
+
+    def get_questions_for_hypothesis(self, questionTemplate: QuestionTemplate, context: Union[TableContext, TextContext],
+                                          hypothesis: Hypothesis) -> List[Question]:
+        """ Creates a list of questions. """
+        res: List[Question] = []
+        variations: List[AnswerLog] = hypothesis.get_variations()
+
+        hypothesis_combinations: List[Set[Answer]] = hypothesis.get_variations()
+
+        if context.contains(hypothesis_combinations):
+            representation: List[str] = context.get_answer_representation(hypothesis_combinations)
+            for question in questionTemplate.get_questions():
+                if has_placeholder(question):
+                    question = get_parameterized_question(question, "HYPOTHESIS", " and ".join(representation))
+                if len(question.rstrip().lstrip()) > 10:
+                    res.append(Question(question))
+        return res
+
+
+
+
+    def _(self):
+        c = """
+    def get_table_questions(self, questionTemplate: QuestionTemplate, context: TableContext, archive: AnswerDocumentArchive) -> List[Question]:
+        "" Creates a list of questions. ""
+        return self.get_text_questions(questionTemplate=questionTemplate,
+                                       context=context,
+                                       archive=archive)
+
+    def get_table_questions_for_hypothesis(self, questionTemplate: QuestionTemplate, contexts: List[TableContext],
+                                          hypothesis: Hypothesis) -> List[Question]:
+        "" Creates a list of questions. ""
+        
 
     def _build_question_textcontext_tuple(self, questionTemplate, contexts=[], hypothesis=None) -> Question:
         context_question_tuples: List[Question] = []
@@ -55,7 +178,6 @@ class TemplateEngine:
                     context_question_tuples.extend([(Question(question), context) for context in contexts])
 
         return context_question_tuples
-
 
     def _build_question_tablecontext_tuple(self, questionTemplate, contexts=[], hypothesis=None) -> Question:
         context_question_tuples: List[Question] = []
@@ -173,8 +295,6 @@ class TemplateEngine:
         contextualizations: List[str] = []
         variations: List[Answer] = hypothesis.get_variations()
 
-
-
         for variation in variations:
             has_context = False
 
@@ -202,29 +322,33 @@ class TemplateEngine:
                 return ''
         return ' and '.join(contextualizations)
 
-
     def __get_contextualized_representation(self, context, answer: KnowledgeObject):
         if answer in context.get_knowledgeObjects():
             return context.get_textual_representation(answer)
         else:
             return ''
+        """
 
 
-    def _build_context(self, questionTemplate: QuestionTemplate, context_format='normal_form', frame: int = 1) -> Context:
+class ContextGenerator:
+    """ Creates Contexts according to a given set of parameters. """
 
-        table_contexts = self.__get_table_contexts(questionTemplate, context_format)
-        text_contexts = self.__get_text_contexts(questionTemplate, context_format, frame)
+    def __init__(self):
+        self.settings: Dict = {
+            "context_size": 3,
+            "context_type": "simple"
+        }
 
-        return text_contexts, table_contexts
 
-    def __get_table_contexts(self, questionTemplate: QuestionTemplate, context_format):
+    def get_tables(self, questionTemplate: QuestionTemplate, topMap: TopologicalMap) -> List[TableContext]:
+        """ Get table contexts for a given searchquery. """
         found_tables: List[Table] = []
         contexts: List[TableContext] = []
 
         for regex in questionTemplate.search_regexs:
-            found_tables.extend(self._topological_map.get_tables_for_regex(regex))
+            found_tables.extend(topMap.get_tables_for_regex(regex))
         for category in questionTemplate.search_categories:
-            found_tables.extend(self._topological_map.get_tables_for_category(category))
+            found_tables.extend(topMap.get_tables_for_category(category))
         found_tables = set(found_tables)
 
         for table in found_tables:
@@ -233,56 +357,50 @@ class TemplateEngine:
 
         return contexts
 
+    def get_tables_for_hypothesis(self, questionTemplate: QuestionTemplate, topMap: TopologicalMap) -> List[TableContext]:
+        """ Get tables for a given searchquery. """
+        table_contexts: List[TableContext] = self.get_tables(questionTemplate=questionTemplate,
+                                                             topMap=topMap
+                                                             )
 
-    def __get_text_contexts(self, questionTemplate: QuestionTemplate, context_format, frame: int = 1) -> List[TextContext]:
+
+
+        pass
+
+    def get_text(self,  questionTemplate: QuestionTemplate, topMap: TopologicalMap, settings: Dict = {}) -> List[TextContext]:
+        """ Get Text Contexts for a given searchquery. """
+
+        if "frame_size" in settings:
+            frame_size = settings['frame_size']
+        else:
+            frame_size = self.settings['frame_size']
+
+        if "context_type" in settings:
+            context_type = settings['context_type']
+        else:
+            context_type = self.settings['context_type']
         found_sentences: List[Sentence] = []
         contexts: List[TextContext] = []
 
+        # Get all sentences that contain a searchterm from the searchspace
         for regex in questionTemplate.search_regexs:
-            found_sentences.extend(self._topological_map.get_sentences_for_regex(regex))
+            found_sentences.extend(topMap.get_sentences_for_regex(regex))
         for category in questionTemplate.search_categories:
-            found_sentences.extend(self._topological_map.get_sentences_for_category(category))
+            found_sentences.extend(topMap.get_sentences_for_category(category))
         found_sentences = set(found_sentences)
 
+        # Create the contexts
         for sentence in found_sentences:
-            framing_sentences: List[Sentence] = sentence.get_framing_sentences(frame)
-            textual_representation: str = " ".join([sent.get_form(context_format) for sent in framing_sentences])
-            context = TextContext(framing_sentences, textual_representation, context_format)
+            framing_sentences: List[Sentence] = sentence.get_framing_sentences(frame_size)
+            textual_representation: str = " ".join([sent.get_form(context_type) for sent in framing_sentences])
+            context = TextContext(framing_sentences, textual_representation, context_type)
             contexts.append(context)
 
         return contexts
 
 
-    def _safe_in_archive(self, archive_file: Tuple[AnswerDocumentArchive, str]) -> None:
-        self._archive[archive_file[1]] = archive_file[0]
-
-    def build_answer_document(self, template: QuestionTemplate, task: str = 'normal', hypothesis: Hypothesis = None, doc_type: str ='', mode: int =1) -> _AnswerDocument:
-        # Gets the contexts by searching the different types of Information Units (Table, Text) with the
-        # predefined searchstrings
-        text_contexts, table_contexts = self._build_context(template, task)
-
-        # For every identified context, look if a Question with one specific context can be build
-        text_tuple: List[Tuple[Question, TextContext]] = self._build_question_textcontext_tuple(template, text_contexts, hypothesis)
-        table_tuple: List[Tuple[Question, TableContext]] = self._build_question_tablecontext_tuple(template, table_contexts, hypothesis)
-
-        archive_key: str = '_'.join(template.get_questionType())
-        answer_document = _AnswerDocument(template, hypothesis, text_tuple, table_tuple, doc_type, mode)
-        if archive_key not in self._archive:
-            self._archive[archive_key] = [answer_document]
-        else:
-            self._archive[archive_key].append(answer_document)
-
-        return answer_document
 
 
-
-    def save_archive_as_json(self) -> dict:
-        return self._archive.save_as_json()
-
-    def set_templates(self, qTemplates: List[QuestionTemplate]) -> None:
-        self._templates = qTemplates
-
-    def set_topological_map(self, topMap: TopologicalMap) -> None:
-        self._topological_map = topMap
-
-
+    def get_text_for_hypothesis(self,  questionTemplate: QuestionTemplate, topMap: TopologicalMap) -> List[TextContext]:
+        """ Get Text Contexts  for a given searchquery. """
+        pass

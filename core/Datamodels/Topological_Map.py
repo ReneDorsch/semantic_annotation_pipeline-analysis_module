@@ -32,7 +32,7 @@ class TopologicalMap:
         return tables
 
     @lru_cache(maxsize=1000)
-    def get_tables_for_regex(self, regex: str) -> List[Sentence]:
+    def get_tables_for_regex(self, regex: str) -> List[Table]:
         tables = self._get_tables_representation()
         res: List[Sentence] = []
 
@@ -45,17 +45,25 @@ class TopologicalMap:
         return res
 
     @lru_cache(maxsize=1000)
-    def get_tables_for_category(self, category: str) -> List[Sentence]:
-        tables = self._get_tables_representation()
+    def get_tables_for_category(self, category: str) -> List[Table]:
+        tables: List[Table] = self._tables
         res: List[Sentence] = []
 
+
+        for table in tables:
+            table_categories = set([_.category for _ in table.get_knowledgeObjects()])
+            if category in table_categories:
+                res.append(table)
+                continue
+
+        deprecated = """
         for table, sentences in tables.items():
             for sentence in sentences:
                 categories_of_kObjs = [kObj.category for kObj in sentence.knowledgeObjects]
                 if category in categories_of_kObjs:
                     res.append(table)
                     break
-
+        """
         return res
 
 

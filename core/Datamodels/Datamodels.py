@@ -1,6 +1,6 @@
 from __future__ import annotations
 from core.Datamodels import IO_Models
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 import re
 from pandas import DataFrame
 
@@ -646,7 +646,7 @@ class Table:
         textual_representations = []
         for line in _data:
             for cell, table_cell,  unit in zip(line.cells, _table_header.cells, _units):
-                text: str = f"The {table_cell._text} has a value of {cell._text}{' in ' + unit if unit != '' else ''}."
+                text: str = f"The {table_cell._text} has a value of {cell._text}{' in ' + unit if unit.rstrip().lstrip() != '' else ''}."
                 text = re.sub(" +", " ", text)
                 textual_representations.append(Sentence.read_from_text(text, data.knowledgeObject_references))
 
@@ -1051,8 +1051,6 @@ class TableAnswer(Answer):
             knowledgeObjects = cell.get_knowledgeObjects()
             textual_answer = cell.get_text()
         question = Question(question)
-        print('Answer:', textual_answer)
-        print('Position:', answer)
         self._positon: Tuple[int, int] = answer
         self._cell: Cell = cell
         super().__init__(textual_answer, question, context, knowledgeObjects)
@@ -1133,6 +1131,8 @@ class Context:
 
 
 
+
+
 class TableContext(Context):
 
     def __init__(self, table: Table):
@@ -1147,6 +1147,72 @@ class TableContext(Context):
         res['textual_representation'] = self._textual_representation
         res['knowledgeObject_ids'] =  [_.id for _ in self._knowledgeObjects]
         return res
+
+    def contains(self, answer: Union[List[Answer], Answer]) -> bool:
+        """ Checks if an answer is inside the context """
+
+        if isinstance(answer, Answer):
+            answers = [answer]
+        else:
+            answers = answer
+
+        res: List[bool] = []
+        for answer in answers:
+            is_same: bool = answer.context is self
+            is_in_textual_representation: bool = answer.textual_representation in self._textual_representation
+            is_in_knowledgeObjects: bool = any([_ in answer.get_knowledgeObjects() for _ in self._knowledgeObjects])
+
+            res.append(any([is_same, is_in_knowledgeObjects, is_in_textual_representation]))
+
+        return any(res)
+
+    def contains_strict(self, answer: Union[List[Answer], Answer]) -> bool:
+        """ Checks if an answer is inside the context """
+
+        if isinstance(answer, Answer):
+            answers = [answer]
+        else:
+            answers = answer
+
+        res: List[bool] = []
+        for answer in answers:
+            is_same: bool = answer.context is self
+            is_in_textual_representation: bool = answer.textual_representation in self._textual_representation
+            is_in_knowledgeObjects: bool = any([_ in answer.get_knowledgeObjects() for _ in self._knowledgeObjects])
+
+            res.append(any([is_same, is_in_knowledgeObjects, is_in_textual_representation]))
+
+        return any(res)
+
+    def get_answer_representation(self, answer: Union[List[Answer], Answer]) -> List[str]:
+
+        def _helper_function(answer: Answer):
+            res = ""
+            for sentence in self._table._textual_representation:
+                for kObj in answer.get_knowledgeObjects():
+                    if kObj in sentence.knowledgeObjects:
+                        for label in kObj.labels:
+                            if label in sentence._text:
+                                return label
+            return res
+
+        if isinstance(answer, Answer):
+            answers = [answer]
+        else:
+            answers = answer
+        res: List[str] = []
+        for answer in answers:
+            is_same: bool = answer.context is self
+            is_in_textual_representation: bool = answer.textual_representation in self._textual_representation
+            is_in_knowledgeObjects: bool = any([_ in answer.get_knowledgeObjects() for _ in self._knowledgeObjects])
+
+            if is_same or is_in_textual_representation:
+                res.append(answer.textual_representation)
+            elif is_in_knowledgeObjects:
+                res.append(_helper_function(answer))
+
+        return res
+
 
 
 
@@ -1195,6 +1261,71 @@ class TextContext(Context):
         return res
 
 
+    def contains(self, answer: Union[List[Answer], Answer]) -> bool:
+        """ Checks if an answer is inside the context """
+
+        if isinstance(answer, Answer):
+            answers = [answer]
+        else:
+            answers = answer
+
+        res: List[bool] = []
+        for answer in answers:
+            is_same: bool = answer.context is self
+            is_in_textual_representation: bool = answer.textual_representation in self._textual_representation
+            is_in_knowledgeObjects: bool = any([_ in answer.get_knowledgeObjects() for _ in self._knowledgeObjects])
+
+            res.append(any([is_same, is_in_knowledgeObjects, is_in_textual_representation]))
+
+        return any(res)
+
+    def contains_strict(self, answer: Union[List[Answer], Answer]) -> bool:
+        """ Checks if an answer is inside the context """
+
+        if isinstance(answer, Answer):
+            answers = [answer]
+        else:
+            answers = answer
+
+        res: List[bool] = []
+        for answer in answers:
+            is_same: bool = answer.context is self
+            is_in_textual_representation: bool = answer.textual_representation in self._textual_representation
+            is_in_knowledgeObjects: bool = any([_ in answer.get_knowledgeObjects() for _ in self._knowledgeObjects])
+
+            res.append(any([is_same, is_in_knowledgeObjects, is_in_textual_representation]))
+
+        return all(res)
+
+
+    def get_answer_representation(self, answer: Union[List[Answer], Answer]) -> List[str]:
+
+        def _helper_function(answer: Answer):
+            res = ""
+            for sentence in self._sentences:
+                for kObj in answer.get_knowledgeObjects():
+                    if kObj in sentence.knowledgeObjects:
+                        for label in kObj.labels:
+                            if label in sentence._text:
+                                return label
+            return res
+
+        if isinstance(answer, Answer):
+            answers = [answer]
+        else:
+            answers = answer
+        res: List[str] = []
+        for answer in answers:
+            is_same: bool = answer.context is self
+            is_in_textual_representation: bool = answer.textual_representation in self._textual_representation
+            is_in_knowledgeObjects: bool = any([_ in answer.get_knowledgeObjects() for _ in self._knowledgeObjects])
+
+            if is_same or is_in_textual_representation:
+                res.append(answer.textual_representation)
+            elif is_in_knowledgeObjects:
+                res.append(_helper_function(answer))
+
+        return res
 
     def get_knowledgeObjects(self) -> List[KnowledgeObject]:
         kObjs = self._knowledgeObjects

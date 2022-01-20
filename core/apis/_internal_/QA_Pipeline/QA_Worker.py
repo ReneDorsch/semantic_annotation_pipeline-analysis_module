@@ -8,7 +8,7 @@ from transformers import AutoConfig
 
 from core import config
 from core.Datamodels.Datamodels import TableContext, TableAnswer, TextContext, TextAnswer, Question
-from core.Datamodels.Answer_Document import _AnswerDocument
+from core.Datamodels.Answer_Document import AnswerLog
 import pandas as pd
 
 
@@ -21,7 +21,7 @@ def text_question_worker(queue: Queue):
     while True:
 
         answerList = []
-        doc: _AnswerDocument = queue.get()
+        doc: AnswerLog = queue.get()
 
         if doc == -1:
             print("Feierabend")
@@ -36,7 +36,7 @@ def text_question_worker(queue: Queue):
         for question, context, answer in result:
             _has_relevant_answer: bool = "answer" in answer and "start" in answer \
                                        and "end" in answer and "score" in answer
-            if not _has_relevant_answer: print("Relevant answer: ", _has_relevant_answer)
+
             if _has_relevant_answer:
                 answerList.append(TextAnswer(answer['answer'], answer['start'], answer['end'], question, context,
                                  answer['score']))
@@ -109,8 +109,6 @@ def prepare_inputs(tables: List['Table'], questions, tokenizer):
 
     table_input_tuple = []
     for table in distinct_tables:
-        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-            print(table)
         inputs = tokenizer(table=table, queries=queries, padding='max_length', return_tensors="pt")
         table_input_tuple.append((table, inputs))
 
@@ -180,7 +178,7 @@ def table_question_worker(queue: Queue):
     while True:
 
         answerList = []
-        doc: _AnswerDocument = queue.get()
+        doc: AnswerLog = queue.get()
 
         if doc == -1:
             print("Feierabend")
@@ -206,7 +204,6 @@ def table_question_worker(queue: Queue):
 
         doc._answered_by_table = True
 
-      #  print(f"Questions Answerd In Table: {questionTemplate.questionCategory}")
         queue.task_done()
 
 
